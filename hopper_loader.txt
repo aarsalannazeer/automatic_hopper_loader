@@ -1,0 +1,430 @@
+#include <xc.h>
+#define F_CPU 16000000 
+#include<util/delay.h>
+#include<avr/eeprom.h>
+
+
+
+
+void seven_seg1(int y)
+
+{
+	
+	if (y==0){
+
+		PORTD=0b11111110;
+		
+	}
+	else if (y==1){
+		PORTD=0b0110000;
+	}
+	else if (y==2){
+		PORTD=0b01101101;
+	}
+	else if (y==3){
+		PORTD=0b01111001;
+	}
+	else if (y==4){
+		PORTD=0b00110011;
+	}
+	else if (y==5){
+		PORTD=0b01011011;
+	}
+	else if (y==6){
+		PORTD=0b01011111;
+	}
+	else if (y==7){
+		PORTD=0b01110000;
+	}
+	else if (y==8){
+		PORTD=0b01111111;
+	}
+	else if (y==9){
+		PORTD=0b01111011;
+	}
+	
+}
+////////////////////////////////
+void seven_seg2(int y, int source,int buzzer_on)
+{
+	
+	if (y==0){
+
+		
+		PORTC=0b00111111;
+		PORTB=0b00000000 | (source<<PINB5)| (buzzer_on<<PINB1)| (buzzer_on<<PINB2);
+		
+	}
+	else if (y==1)
+	{
+		
+		
+		PORTC=0b00000110;
+		PORTB=0b00000000 | (source<<PINB5)| (buzzer_on<<PINB1)| (buzzer_on<<PINB2);
+	}
+	else if (y==2){
+		
+		PORTC=0b01011011;
+		PORTB=0b00000001 | (source<<PINB5)| (buzzer_on<<PINB1)| (buzzer_on<<PINB2);
+	}
+	else if (y==3){
+		
+		PORTC=0b01001111;
+		PORTB=0b00000001 | (source<<PINB5)| (buzzer_on<<PINB1)| (buzzer_on<<PINB2);
+	}
+	else if (y==4){
+		
+		PORTC=0b01100110;
+		PORTB=0b00000001 | (source<<PINB5)| (buzzer_on<<PINB1)| (buzzer_on<<PINB2);
+	}
+	else if (y==5){
+	
+		PORTC=0b01101101;
+		PORTB=0b00000001 | (source<<PINB5)| (buzzer_on<<PINB1)| (buzzer_on<<PINB2);
+		
+	}
+	else if (y==6){
+		
+		PORTC=0b01111101;
+		PORTB=0b00000001 | (source<<PINB5)| (buzzer_on<<PINB1)| (buzzer_on<<PINB2);
+	}
+	else if (y==7){
+		
+		PORTC=0b00000111;
+		PORTB=0b00000000 | (source<<PINB5)| (buzzer_on<<PINB1)| (buzzer_on<<PINB2);
+	}
+	else if (y==8){
+		
+		PORTC=0b01111111;
+		PORTB=0b00000001 | (source<<PINB5)| (buzzer_on<<PINB1)| (buzzer_on<<PINB2);
+	}
+	else if (y==9){
+		
+		PORTC=0b01101111;
+		PORTB=0b00000001 | (source<<PINB5)| (buzzer_on<<PINB1)| (buzzer_on<<PINB2);
+	}
+}
+
+
+
+//////////////////////////////
+
+int main(void)
+{
+	
+	DDRD=0b01111111;
+	DDRC=0xFF;
+	DDRB=0b00100001;
+	uint8_t a=0;
+	uint8_t runtime=0;
+	int x=0;
+	int y=0;
+	int count=0;
+	int set_on=0;
+	int source=0;
+	///int msw=0;
+	int i=0;
+	int buzzer_on=0;
+	int buzer_fn=0;
+	//int microswitch=0;
+	runtime=eeprom_read_byte((uint8_t*)0x100);
+	a=eeprom_read_byte((uint8_t*)0x101);
+	
+	if (a>0)
+	{
+		runtime=a;
+		
+	
+	}
+	////////////////////////
+	if(a==0)// && (PIND>>PIND7)&1)
+	{
+		runtime=eeprom_read_byte((uint8_t*)0x100);
+	}
+	//////////////////////////*/
+	
+	PORTD=0b11111110;
+	PORTC=0b00111111;
+	PORTB=0b00000000;
+	////////////////////////////
+
+	
+///////////////////////////////////
+	  while(1)
+    {
+	///////////////////////////SET BUTTON/////////////
+	
+	if ((PINB>>3)&1)
+	{
+		DDRB&=~((1<<PINB1)|(1<<PINB2)|(1<<PINB4));
+		_delay_ms(20);
+		while((PINB>>3)&1);
+		_delay_ms(20);
+		
+		set_on++;
+
+	
+		if(set_on>2)
+		{
+			set_on=1;
+		}
+		buzer_fn=0;
+		buzzer_on=0;
+		i=0;
+	}
+///////////////7_SEGMENT_1 BLINK/////////
+	if(set_on==1)
+	{
+		
+		if(count<500)
+		{seven_seg1(x);}
+		
+		if(count>500)
+		{PORTD=0x00;}
+	}
+
+	
+///////////////7_SEGMENT_2 BLINK/////////
+
+if(set_on==2)
+{
+	
+	if(count<500)
+	seven_seg2(y,source,buzzer_on);
+	
+	if(count>500)
+	{PORTC=0x00;
+	PORTB=0b00000000;}
+}
+
+/*////////////////BLINK SET MANUAL///////////////
+		if(set_on==1)
+		{
+			PORTD=0x00;
+			_delay_ms(100);
+			seven_seg1(x);
+			_delay_ms(100);
+			
+			
+		}
+		
+		
+		if(set_on==2)
+		{
+			PORTC=0x00;
+			PORTB=0b00000000;
+			_delay_ms(100);
+			seven_seg2(y);
+			_delay_ms(100);
+		}
+*/////
+
+
+//////////////7_Segment 1//////////   
+
+          ////////INCREMENT BUTTON////////
+	if ((PINB>>1)&1 && set_on==1)
+	{
+		
+		_delay_ms(20);
+		while((PINB>>1)&1);
+		_delay_ms(20);
+		
+		 x++;
+		 if(x>9)
+		 {
+			 x=0;
+		 }
+			
+	}
+	//////////DECREMENT BUTTON///////////
+	
+	if ((PINB>>2)&1 && set_on==1)
+	{
+		
+		_delay_ms(20);
+		while((PINB>>2)&1);
+		_delay_ms(20);
+		
+		x--;
+		if(x<0)
+		{
+			x=9;
+		}
+	}
+		
+////////////////////////7_Segment 2///////////
+		////////INCREMENT BUTTON////////
+		
+		if ((PINB>>1)&1 && set_on==2)
+		{
+			_delay_ms(20);
+			while((PINB>>1)&1);
+			_delay_ms(20);
+			
+			y++;
+			if(y>9)
+			{
+				y=0;
+			}
+			
+		}
+       //////////DECREMENT BUTTON///////////
+		if ((PINB>>2)&1 && set_on==2)
+		{
+			
+			
+			_delay_ms(20);
+			while((PINB>>2)&1);
+			_delay_ms(20);
+			
+			y--;
+			if(y<0)
+			{
+				y=9;
+			}
+		
+	}
+	
+	
+	//seven_seg1(x);
+	//seven_seg2(y);
+	//_delay_ms(500);
+
+///////////////////counter1000_for non_blocking_delay_above////////////
+
+_delay_ms(1);
+count++;
+if(count>1000)
+{
+	count=0;
+}
+		
+	seven_seg1(x);
+	seven_seg2(y, source,buzzer_on);
+	
+/////////////////////////ENTER BUTTON/////////////
+
+if ((PINB>>4)&1)
+{
+	
+	
+	_delay_ms(20);
+	while((PINB>>4)&1);
+	_delay_ms(20);
+	set_on=0;
+	//if(i==0)
+	runtime=((10*y)+x);
+	if(buzer_fn==0)
+	eeprom_write_byte((uint8_t*)0x100,runtime);
+	else
+		{
+			runtime=eeprom_read_byte((uint8_t*)0x100);
+			buzzer_on=0;
+			buzer_fn=0;
+		}
+		DDRB|=((1<<PINB1)|(1<<PINB2)|(1<<PINB3));
+		
+}
+//
+if (set_on==0 && runtime>0 && (PIND>>7)&1)
+{
+	if (count==0)
+	{
+		runtime--;
+		if(runtime<0)
+		runtime=0;
+		/////////////////////////
+		eeprom_write_byte((uint8_t*)0x101,runtime);
+	
+		
+		////////////////////////////////
+	}
+	y=runtime/10;
+	x=runtime-y*10;
+	source=1;
+	//y=runtime;
+	
+}
+if (runtime==0|| !((PIND>>7)&1))
+{
+	source=0;
+}
+if(runtime==0 && !((PIND>>7)&1) && set_on==0)
+ {
+ 	runtime=eeprom_read_byte((uint8_t*)0x100);
+	 i=0;
+
+ }
+
+/*///////////////////////
+if ( runtime==0 && (PIND>>7)&1 && (PINB>>4)&1)
+{
+	a=eeprom_read_byte((uint8_t*)0x100);
+}
+
+*////////////////////////////
+//if(runtime==0 && (PIND>>7)&1 && (PINB>>4)&1)
+if(runtime==0 && !(PINB>>4)&1 && set_on==0)
+{ 
+	if(count==0)
+	{
+	i++;	
+	//y=i;
+	}
+	
+		//for(int i=0;i<3;i++)
+		//{                                                                                                                                                                                                          
+			
+			if(i==3 && (PIND>>7)&1)
+			{
+				//DDRB=0b00100111;
+				buzer_fn=1;
+				//buzzer_ftn=1;
+				DDRB|=((1<<PINB1)|(1<<PINB2));
+				if(buzzer_on==1)
+				{
+				
+					buzzer_on=0;
+					//_delay_ms(500);
+				}
+					
+				
+				else
+				{
+				
+					buzzer_on=1;
+					//_delay_ms(500);
+				
+				}
+				i=0;
+			}
+				
+			
+}
+				//if(count<500)
+				//if(buzzer_on==1)
+				//buzzer_on=0;
+				//else
+				//buzzer_on=1;
+ 				
+// 				PORTB=0b00000110;
+				//_delay_ms(500);
+				
+	      
+			                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+			
+// 			else
+// 			buzzer_on=0;
+
+if (set_on==0 && ((PIND>>7)&1) && ((PINB>>4)&1))
+{
+	runtime=eeprom_read_byte((uint8_t*)0x100);
+	buzzer_on=0;
+	i=0;
+}
+
+///////////////////////////
+
+	}
+} 
